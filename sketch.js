@@ -24,7 +24,10 @@ var calentamiento = 0;
 var enemigo,enemigo2;
 var music;
 var explocion;
-
+var friends,friends2;
+var friendsGroup;
+var dificult = 10;
+var enunciado = 0;
 
 
 
@@ -69,7 +72,10 @@ enemigo = createSprite(-100,-10,20,20);
 enemigo2 = createSprite(-100,-20,20,20);
 
   
-  
+friends = createSprite(-100,height+100,10,40);
+friends2 = createSprite(-100,height+100,10,40);
+
+
   
   
   
@@ -81,6 +87,7 @@ enemigo2 = createSprite(-100,-20,20,20);
   resetgroup = new Group();
   laserrsGroup2 = new Group();
   asteroidsGroup = new Group();
+  friendsGroup = new Group();
 
 
   
@@ -111,13 +118,11 @@ function draw() {
   if (gameState===0){
     if (keyDown("SPACE")){
       gameState = 1;
-      
     }
-    
     textSize(width/40);
      fill("white")
   text("Presiona la tecla espacio para empezar",width/4+80,height/2-50);
-
+    
     
    
   }
@@ -130,6 +135,16 @@ function draw() {
       calentamiento = calentamiento + 5;
   }
 //}
+
+if(frameCount % 200 === 0){
+    dificult = dificult - 1;
+}
+
+if(dificult < 1){
+  dificult = dificult + 1;
+}
+
+
 
 if (keyDown("1")){
     reset2();
@@ -147,12 +162,13 @@ if (keyDown("1")){
   }
 
 recarga.height = calentamiento;
+if(enunciado === 0){
+  if(score < 10){
+    textSize(width/40);
+    fill("white")
+    text("Destruye a los meteoritos y a las otras naves!",windowWidth/5,300);
 
-if(score < 10){
-  textSize(width/40);
-  fill("white")
-  text("Destruye a los meteoritos y a las otras naves!",windowWidth/5,300);
-
+  }
 }
   
    
@@ -189,8 +205,11 @@ if(score < 10){
     spawnenemis();
     spawnlasersenemi();
     spawnlasersenemi2();
+    spawnlaserrsfriends();
+    spawnlaserrsfriends2();
     spawnasteroids();
     spawnenemis2();
+    spawnfriends();
     
     
     
@@ -237,9 +256,18 @@ if(score < 10){
 
   if(laserrsGroup2.collide(nave)){
     gameState = 2;
-
   
-}
+  }
+
+  if(laserrsGroup2.collide(friends)){
+    friends.visible = false;
+    friends = createSprite(-100,-10,20,20);
+  }
+
+  if(laserrsGroup2.collide(friends2)){
+    friends2.visible = false;
+    friends2 = createSprite(-100,-20,20,20);
+  }
 
   if(laserrsGroup.collide(enemigoGroup)){
     score = score + 100;
@@ -248,7 +276,7 @@ if(score < 10){
     enemigo = createSprite(-100,-20,20,20);
 
     enemigo2.lifetime = 1;
-}
+  }
 
 if(laserrsGroup.collide(enemigoGroup2)){
   score = score + 100;
@@ -259,7 +287,19 @@ if(laserrsGroup.collide(enemigoGroup2)){
 
 
 
+  }
+
+if(friends.y < nave.y+30){
+    friendsGroup.setVelocityYEach(0);
+    friends2.velocityY = 0;
 }
+
+if(friends.x < -5){
+friendsGroup.destroyEach();
+}
+
+friends.x = nave.x-100;
+friends2.x = nave.x+100;
 
 
 }
@@ -294,6 +334,10 @@ if(laserrsGroup.collide(enemigoGroup2)){
     laserrsGroup2.setVelocityYEach(0);
     laserrsGroup2.setVelocityXEach(0);
     asteroidsGroup.setVelocityYEach(0);
+    friendsGroup.setVelocityYEach(0);
+    friendsGroup.setVelocityXEach(0);
+
+
 
 
 
@@ -321,6 +365,8 @@ function spawnlaserrs() {
   if(calentamiento <= 200){
   if (keyDown("SPACE")) {
     laserr = createSprite(nave.x,nave.y,40,10);
+
+
     laserr.addImage(laserrImage);
     laserr.scale = 0.2;
     laserr.velocityY = -10;
@@ -334,9 +380,54 @@ function spawnlaserrs() {
     laserrsGroup.add(laserr);
   }
 
+} 
 }
- 
+
+function spawnlaserrsfriends(){
+if(friends.y < nave.y+200){
+  if(calentamiento <= 200){
+    if (keyDown("SPACE")) {
+      laserr = createSprite(friends.x,friends.y,40,10);
   
+  
+      laserr.addImage(laserrImage);
+      laserr.scale = 0.2;
+      laserr.velocityY = -10;
+      laser.play();
+  
+      laserr.lifetime = height+10;
+      
+      laserr.depth = nave.depth;
+      nave.depth = nave.depth + 1;
+      
+      laserrsGroup.add(laserr);
+    }
+  } 
+ }
+}
+
+function spawnlaserrsfriends2(){
+  if(friends.y < nave.y+200){
+  if(calentamiento <= 200){
+    if (keyDown("SPACE")) {
+      laserr = createSprite(friends2.x,friends2.y,40,10);
+  
+  
+      laserr.addImage(laserrImage);
+      laserr.scale = 0.2;
+      laserr.velocityY = -10;
+      laser.play();
+  
+      laserr.lifetime = height+10;
+      
+      laserr.depth = nave.depth;
+      nave.depth = nave.depth + 1;
+      
+      laserrsGroup.add(laserr);
+    }
+  
+  } 
+}
 }
 
 function spawnlasersenemi() {
@@ -478,7 +569,7 @@ function spawnenemis(){
 
 
   function spawnasteroids(){ 
-    if (frameCount % 10 === 0) {
+    if (frameCount % dificult === 0) {
      
         asteroids = createSprite(20,camera.y-500,10,40);
         asteroids.x = Math.round(random(0,windowWidth));
@@ -499,6 +590,48 @@ function spawnenemis(){
       }
       
     }
+
+    function spawnfriends(){ 
+      if (frameCount % 500 === 0) {
+       
+          friends = createSprite(nave.x-100,height,10,40);
+          friends2 = createSprite(nave.x+100,height,10,40);
+
+          friends.velocityY = -7;
+          friends2.velocityY = -7;
+
+          
+          
+    
+         
+          friends.addAnimation("nave",navei);
+          friends2.addAnimation("nave",navei);
+
+          
+          //friends.lifetime = height;
+          
+          friends.scale = 0.1;
+          friends2.scale = 0.1;
+
+          friendsGroup.add(friends,friends2);
+        deletefriends();
+        }
+        
+      }
+
+      function deletefriends(){ 
+        if (frameCount % 500 === 0) {
+         
+            friends.velocityX = -7;
+            friends2.velocityX = 7;
+  
+  
+            
+    
+          
+          }
+          
+        }
   
   
 
@@ -521,7 +654,7 @@ function reset(){
   enemigoGroup2.destroyEach();
 
 
-  
+  dificult = 10;
   score = 0;
   nave.x = windowWidth/2;
  calentamiento = 1;
@@ -534,14 +667,19 @@ function reset(){
  enemigo = createSprite(-100,-10,20,20);
  enemigo2 = createSprite(-100,-20,20,20);
  nave.changeAnimation("nave",navei);
+ friendsGroup.destroyEach();
 
-    
+ friends = createSprite(-100,-10,20,20);
+ friends2 = createSprite(-100,-20,20,20);
+
+ enunciado = enunciado + 1;
+
 };
     
 
 function reset2(){
   nave.changeAnimation("nave",navei);
-
+dificult = 10;
   
   resetgroup.destroyEach();
   obsjetosgroup.destroyEach();
@@ -551,15 +689,25 @@ function reset2(){
   laserrsGroup.destroyEach();
   laserrsGroup2.destroyEach();
   asteroidsGroup.destroyEach();
+  friendsGroup.destroyEach();
 
  
   enemigo = createSprite(-100,-10,20,20);
   enemigo2 = createSprite(-100,-20,20,20);
+
+  friends = createSprite(-100,-10,20,20);
+  friends2 = createSprite(-100,-20,20,20);
   
 
-    
+  enunciado = enunciado + 1;
+
 };
     
+
+
+
+
+
 
 
 
