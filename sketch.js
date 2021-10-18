@@ -592,7 +592,7 @@ function spawnenemis(){
     }
 
     function spawnfriends(){ 
-      if (frameCount % 500 === 0) {
+      if (frameCount % 2500 === 0) {
        
           friends = createSprite(nave.x-100,height,10,40);
           friends2 = createSprite(nave.x+100,height,10,40);
